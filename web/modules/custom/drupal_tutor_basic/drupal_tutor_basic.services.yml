@@ -1,0 +1,4 @@
+services:
+    drupal_tutor_basic.content_manager:
+        class: Drupal\tutor_basic\Services\ContentManagerServices
+        arguments: ['@entity_type.manager', '@current_user']

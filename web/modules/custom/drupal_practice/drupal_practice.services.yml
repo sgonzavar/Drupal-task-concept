@@ -1,0 +1,11 @@
+services:
+  Drupal\drupal_practice\EventSubscriber\ConfigSaveSubscriber:
+    arguments:
+      - '@logger.channel.drupal_practice'
+    tags:
+      - { name: event_subscriber }
+
+  logger.channel.drupal_practice:
+    parent: logger.channel_base
+    arguments:
+      - 'drupal_practice'

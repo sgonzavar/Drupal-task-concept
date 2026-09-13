@@ -1,0 +1,5 @@
+name: 'Drupal Practice'
+type: module
+description: 'Excersism Drupal'
+package: Custom
+core_version_requirement: ^10 || ^11

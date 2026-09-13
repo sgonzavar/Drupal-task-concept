@@ -1,0 +1,6 @@
+drupal_practice.form_menu:
+  title: 'Drupal Practice'
+  description: 'Ejercicios personalizados de Drupal'
+  route_name: drupal_practice.form
+  menu_name: main
+  weight: 100

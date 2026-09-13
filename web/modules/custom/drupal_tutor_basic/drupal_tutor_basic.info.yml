@@ -1,0 +1,4 @@
+name: 'tutor Drupal: basic'
+type: module
+description: 'A simple module to demonstrate the basics of Drupal module development.'
+core_version_requirement: ^10 || ^9

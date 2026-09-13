@@ -1,0 +1,26 @@
+drupal_practice.hello:
+  path: '/drupal-practice/hello/{name}'
+  defaults:
+    _controller: '\Drupal\drupal_practice\Controller\PracticeController::hello'
+    _title: 'Drupal Practice'
+    name: 'Drupal'
+  requirements:
+    _permission: 'access content'
+
+
+drupal_practice.render_array:
+  path: '/drupal-practice/render-array'
+  defaults:
+    _controller: '\Drupal\drupal_practice\Controller\PracticeController::renderArray'
+    _title: 'Example Render Array'
+  requirements:
+    _permission: 'access content'
+
+
+drupal_practice.form:
+  path: '/drupal-practice/form'
+  defaults:
+    _form: '\Drupal\drupal_practice\Form\PracticeForm'
+    _title: 'Form Example'
+  requirements:
+    _permission: 'access content'
