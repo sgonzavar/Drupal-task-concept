@@ -1,79 +1,136 @@
-# Docksal powered Drupal 10 With Composer Installation
+# Drupal Task Concepts
 
-This is a sample Drupal 10 with Composer installation pre-configured for use with Docksal.
+Proyecto de práctica para aprender desarrollo con Drupal mediante ejemplos pequeños de módulos personalizados: rutas, controllers, render arrays, formularios, bloques, servicios, inyección de dependencias y eventos.
 
-Features:
+El sitio usa Drupal 10, Composer y Docksal. Su configuración se versiona en `config/sync`, por lo que una instalación nueva puede reconstruirse con los módulos y ajustes actuales.
 
-- Drupal 10 Composer Project
-- `fin init` [example](.docksal/commands/init)
-- Using the [default](.docksal/docksal.env#L9) Docksal LAMP stack with [image version pinning](.docksal/docksal.env#L13-L15)
-- PHP and MySQL settings overrides [examples](.docksal/etc)
+## Stack
 
-## Setup instructions
+- Drupal `10.6.16`
+- PHP y MariaDB administrados por el stack LAMP de Docksal
+- Composer
+- Drush `12.5.3`
+- Olivero como tema público y Claro como tema de administración
 
-### Step #1: Docksal environment setup
+## Módulos contrib instalados
 
-**This is a one time setup - skip this if you already have a working Docksal environment.**
+Las versiones corresponden a `composer.lock`.
 
-Follow [Docksal environment setup instructions](https://docs.docksal.io/getting-started/setup/)
+| Módulo | Versión | Estado en la configuración |
+| --- | ---: | --- |
+| Admin Toolbar | 3.6.3 | Activado |
+| Better Exposed Filters | 7.1.3 | Activado |
+| Chaos Tool Suite (CTools) | 4.1.1 | Activado |
+| Devel | 5.4.0 | Activado, junto con Devel Generate |
+| Examples for Developers | 4.0.6 | Instalado; sus submódulos no están activados |
+| Gin | 4.1.3 | Instalado, no activado |
+| Gin Toolbar | 2.1.0 | Instalado, no activado |
+| Paragraphs | 1.23.0 | Activado |
+| Pathauto | 1.15.0 | Activado |
+| Webform | 6.3.0 | Activado |
 
-### Step #2: Project setup
+También están configurados tipos de contenido para artículos y páginas, tipos de media, un formulario de contacto de Webform y las vistas incluidas en la instalación estándar.
 
-1. Clone this repo into your Projects directory
+## Ejemplos propios
 
-    ```
-    git clone https://github.com/docksal/boilerplate-drupal10-composer.git drupal10
-    cd drupal10
-    ```
+### `drupal_practice`
 
-2. Initialize the site
+Módulo activo que reúne ejercicios básicos de la API de Drupal:
 
-   This will initialize local settings and install the site via drush
+- **Controller y parámetros de ruta:** responde con un saludo personalizado.
+  - `/drupal-practice/hello`
+  - `/drupal-practice/hello/{name}`
+- **Render arrays:** crea un contenedor, encabezado, lista temática y enlace sin escribir HTML directamente.
+  - `/drupal-practice/render-array`
+- **Form API:** formulario con nombre, correo, tecnología favorita y validación de edad mínima.
+  - `/drupal-practice/form`
+- **Plugin de bloque:** bloque `Drupal Practice Block`, disponible para ubicar desde la administración de bloques.
+- **Event subscriber:** escucha `ConfigEvents::SAVE` y registra en el log el nombre de la configuración guardada.
+- **Menú:** agrega un enlace al formulario en el menú principal.
 
-    ```
-    fin init
-    ```
-   A `composer.lock` file will be generated. This file should be committed to your repository.
+### `drupal_tutor_basic`
 
-3. Point your browser to
+Módulo activo en la configuración y todavía en desarrollo. Contiene un ejercicio de servicio personalizado con inyección del administrador de entidades y del usuario actual. La idea es cubrir:
 
-    ```
-    http://drupal10.docksal.site
-    ```
+- consulta de los últimos artículos publicados;
+- cálculo del tiempo de lectura de un texto, usando 200 palabras por minuto;
+- estadísticas básicas de usuarios y páginas del sitio;
+- controllers para exponer estos resultados mediante rutas.
 
-When the automated install is complete, the command line output will display the admin username and password.
+Los controllers de este segundo módulo aún no están incluidos, por lo que sus rutas representan trabajo pendiente.
 
-### Configuration workflow
+## Puesta en marcha
 
-Drupal configuration is versioned in `config/sync`.
+### Requisitos
 
-- After changing configuration in the UI, export it with `fin exec drush cex -y`
-  and commit the resulting YAML files.
-- After pulling configuration changes, apply them to the local database with
-  `fin exec drush cim -y && fin exec drush cr`.
-- `fin init` installs a new database from `config/sync` when an exported
-  configuration set is available.
+- [Docksal](https://docs.docksal.io/getting-started/setup/) instalado
+- Docker Desktop en ejecución
+- Git
 
-Content such as nodes, users, files, and Webform submissions is not Drupal
-configuration and is therefore not included in this workflow.
+### Instalación
 
+```bash
+git clone git@github.com:sgonzavar/Drupal-task-concept.git task-concepts
+cd task-concepts
+fin init
+```
 
-## More automation with 'fin init'
+`fin init` levanta el stack, instala las dependencias de Composer y reconstruye Drupal usando la configuración de `config/sync`. Al terminar muestra las credenciales del administrador.
 
-Site provisioning can be automated using `fin init`, which calls the shell script in [.docksal/commands/init](.docksal/commands/init).
-This script is meant to be modified per project. The one in this repo will give you a good starting example.
+El sitio queda disponible normalmente en:
 
-Some common tasks that can be handled by the init script (and other [custom commands](https://docs.docksal.io/fin/custom-commands/)):
+```text
+http://task-concepts.docksal.site
+```
 
-- initialize local settings files for Docker Compose, Drupal, Behat, etc.
-- import DB or perform a site install
-- compile Sass
-- run DB updates, revert features, clear caches, etc.
-- enable/disable modules, update variables values
+El dominio depende del nombre de la carpeta del proyecto. Puede consultarse con `fin status`.
 
+> `fin init` reinicializa el entorno y reinstala el sitio. Para arrancar una instalación existente usa `fin start`.
 
-## Security notice
+## Comandos útiles
 
-This repo is intended for quick start demos and includes a hardcoded value for `hash_salt` in `settings.php`.
-If you are basing your project code base on this repo, make sure you regenerate and update the `hash_salt` value.
-A new value can be generated with `drush ev '$hash = Drupal\Component\Utility\Crypt::randomBytesBase64(55); print $hash . "\n";'`
+```bash
+# Arrancar o detener el entorno
+fin start
+fin stop
+
+# Limpiar caché
+fin exec drush cr
+
+# Obtener un enlace de acceso como administrador
+fin exec drush uli
+
+# Ver el estado de Drupal
+fin exec drush status
+
+# Exportar cambios hechos desde la interfaz
+fin exec drush cex -y
+
+# Importar la configuración versionada
+fin exec drush cim -y
+fin exec drush cr
+```
+
+## Flujo de configuración
+
+La configuración de Drupal vive en `config/sync`.
+
+1. Después de realizar cambios de estructura o configuración desde la interfaz, ejecuta `fin exec drush cex -y`.
+2. Revisa y versiona los archivos YAML generados.
+3. Después de traer cambios del repositorio, ejecuta `fin exec drush cim -y` y `fin exec drush cr`.
+
+Los nodos, usuarios, archivos y envíos de Webform son contenido; no forman parte de la exportación de configuración.
+
+## Estructura relevante
+
+```text
+.
+├── .docksal/                    # Entorno local y comandos de inicialización
+├── config/sync/                 # Configuración exportada de Drupal
+├── web/                         # Document root
+│   └── modules/custom/
+│       ├── drupal_practice/     # Ejemplos básicos completos
+│       └── drupal_tutor_basic/  # Ejercicios de servicios en progreso
+├── composer.json                # Dependencias declaradas
+└── composer.lock                # Versiones instaladas y reproducibles
+```

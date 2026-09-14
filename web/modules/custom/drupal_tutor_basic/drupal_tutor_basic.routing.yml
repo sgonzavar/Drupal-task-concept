@@ -3,32 +3,28 @@
 drupal_tutor_basic.latest_articles:
   path: 'tutor/basic/articles'
   defaults:
-    _controller: '\Drupal\tutor_basic\Controller\ListArticlesController::listArticles'
+    _controller: '\Drupal\drupal_tutor_basic\Controller\BasicController::listArticles'
     _title: 'Latest Articles'
   requirements:
     _permission: 'access content'
-
-
 
 # ejemplo 02 (GET): Calculo de tiempo de lectura de un nodo
 drupal_tutor_basic.node_reading_time:
   path: 'tutor/basic/article/{node}/reading-time'
   defaults:
-    _controller: '\Drupal\tutor_basic\Controller\NodeReadingTimeController::calculateReadingTime'
+    _controller: '\Drupal\drupal_tutor_basic\Controller\BasicController::Read_time'
   requirements:
     _permission: 'access content'
   options:
     parameters:
-        node:
-            type: entity:node
-
-
+      node:
+        type: entity:node
 
 # ejemplo 03 (GET): Ruta para consultar estadisticas del sitio
 drupal_tutor_basic.site_statistics:
   path: 'tutor/basic/site-statistics'
   defaults:
-    _controller: '\Drupal\tutor_basic\Controller\SiteStatisticsController::getSiteStatistics'
+    _controller: '\Drupal\drupal_tutor_basic\Controller\BasicController::getSiteStatistics'
     _title: 'Site Statistics'
   requirements:
     _role: 'administrator'

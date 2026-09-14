@@ -35,7 +35,7 @@ class ContentManagerService {
   // ejemplo 02. Calcular el tiempo de lectura de un nodo
   public function calculateReadingTime(string $text): int {
     $words = str_word_count(strip_tags($text));
-    $minute = ceil($words / 200); // Asumiendo una velocidad de lectura promedio de 200 palabras por minuto
+    $minute = ceil($words / 200); // Asumiendo una velocidad de lectura promedio de 100 palabras por minuto
     return $minute;
   }
 
