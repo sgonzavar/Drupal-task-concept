@@ -28,3 +28,23 @@ drupal_tutor_basic.site_statistics:
     _title: 'Site Statistics'
   requirements:
     _role: 'administrator'
+
+# ejemplo 04(POST/FORM): Formulario sencillo contanto / sugerencias
+drupal_tutor_basic.contact_form:
+  path: 'tutor/basic/contact-form'
+  defaults:
+    _form: '\Drupal\drupal_tutor_basic\Form\SimpleContactForm'
+    _title: 'Contact Form'
+    requirements:
+      _permission: 'access content'
+
+
+# ejemplo 05 (POST/FORM): Form API interactuando con entidades (Creacion de Pagina)
+drupal_tutor_basic.create_page:
+  path: 'tutor/basic/create-page'
+  defaults:
+    _form: '\Drupal\drupal_tutor_basic\Form\FastPageCreateForm'
+    _title: 'Create Fast Page'
+  requirements:
+    _permission: 'create page content'
+    _role: 'administrator'
