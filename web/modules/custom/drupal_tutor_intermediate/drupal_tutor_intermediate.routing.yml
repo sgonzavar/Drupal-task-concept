@@ -1,0 +1,28 @@
+# 1. Ruta del formulario de configuración (Accesible solo por administradores)
+drupal_tutor_intermediate.settings:
+  path: '/admin/config/tutor/opciones'
+  defaults:
+    _form: '\Drupal\drupal_tutor_intermediate\Form\TutorSettingsForm'
+    _title: 'Opciones de Tutor Intermedio'
+  requirements:
+    _permission: 'administer site configuration'
+
+# 2. Ruta para probar el Custom Access (Área VIP)
+drupal_tutor_intermediate.vip_area:
+  path: '/tutor/intermedio/zona-vip'
+  defaults:
+    # Usaremos una respuesta simple tipo array renderizable en lugar de controlador para ahorrar código
+    _controller: '\Drupal\Core\Controller\HtmlPageController::content'
+    _title: 'Zona VIP'
+  requirements:
+    # AQUÍ DELEGAMOS LA SEGURIDAD AL MÉTODO DE NUESTRO SERVICIO
+    _custom_access: '\Drupal\drupal_tutor_intermediate\Access\VipAccessCheck::access'
+
+# 3. Ruta para lanzar el Formulario de Batch
+drupal_tutor_intermediate.batch_update:
+  path: '/tutor/intermedio/actualizar-nodos'
+  defaults:
+    _form: '\Drupal\drupal_tutor_intermediate\Form\BatchUpdateForm'
+    _title: 'Actualizador Masivo (Batch)'
+  requirements:
+    _permission: 'administer nodes'

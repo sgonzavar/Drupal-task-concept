@@ -1,0 +1,10 @@
+services:
+  # Servicio de validacion de acceso personalizado
+  drupal_tutor_intermediate.custom_access:
+    class: Drupal\drupal_tutor_intermediate\Access\VipAccessCheck
+    argumnets: ['@current_user', '@config.factory']
+
+  # Servicio para logica negocio y Batch API
+  drupal_tutor_intermediate.node_processor:
+    class: Drupal\drupal_tutor_intermediate\Batch\NodeProcessor
+    arguments: ['@entity_type.manager', '@logger.factory']
