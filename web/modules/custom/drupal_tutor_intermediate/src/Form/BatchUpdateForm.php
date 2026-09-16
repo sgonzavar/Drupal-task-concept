@@ -63,7 +63,7 @@ class BatchUpdateForm extends FormBase {
     //Agregamos una operacion por cada grupo (chunk) de nodos
     foreach ($chunks as $chunk) {
       foreach ($chunk as $nid) {
-        $batch->addOperation([NodeProcessor::class, 'process'], [$nid]);
+        $batch->addOperation([NodeProcessor::class, 'processBatchItem'], [$nid]);
       }
     }
 

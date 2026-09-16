@@ -11,8 +11,8 @@ drupal_tutor_intermediate.settings:
 drupal_tutor_intermediate.vip_area:
   path: '/tutor/intermedio/zona-vip'
   defaults:
-    # Usaremos una respuesta simple tipo array renderizable en lugar de controlador para ahorrar código
-    _controller: '\Drupal\Core\Controller\HtmlPageController::content'
+    # Usamos un controlador simple del módulo
+    _controller: 'Drupal\drupal_tutor_intermediate\Controller\VipController::content'
     _title: 'Zona VIP'
   requirements:
     # AQUÍ DELEGAMOS LA SEGURIDAD AL MÉTODO DE NUESTRO SERVICIO
