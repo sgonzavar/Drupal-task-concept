@@ -1,6 +1,6 @@
 # Drupal Task Concepts
 
-Proyecto de práctica para aprender desarrollo con Drupal mediante ejemplos pequeños de módulos personalizados: rutas, controllers, render arrays, formularios, bloques, servicios, inyección de dependencias y eventos.
+Proyecto de práctica para aprender desarrollo con Drupal mediante ejemplos progresivos de módulos personalizados: rutas, controllers, render arrays, Form API, entidades, servicios, inyección de dependencias, ParamConverter, control de acceso, configuración y Batch API.
 
 El sitio usa Drupal 10, Composer y Docksal. Su configuración se versiona en `config/sync`, por lo que una instalación nueva puede reconstruirse con los módulos y ajustes actuales.
 
@@ -31,7 +31,7 @@ Las versiones corresponden a `composer.lock`.
 
 También están configurados tipos de contenido para artículos y páginas, tipos de media, un formulario de contacto de Webform y las vistas incluidas en la instalación estándar.
 
-## Ejemplos propios
+## Módulos personalizados
 
 ### `drupal_practice`
 
@@ -50,14 +50,37 @@ Módulo activo que reúne ejercicios básicos de la API de Drupal:
 
 ### `drupal_tutor_basic`
 
-Módulo activo en la configuración y todavía en desarrollo. Contiene un ejercicio de servicio personalizado con inyección del administrador de entidades y del usuario actual. La idea es cubrir:
+Módulo del Sprint 1, activo en la configuración exportada. Practica servicios personalizados, inyección de dependencias, EntityQuery, ParamConverter, render arrays y Form API.
 
-- consulta de los últimos artículos publicados;
-- cálculo del tiempo de lectura de un texto, usando 200 palabras por minuto;
-- estadísticas básicas de usuarios y páginas del sitio;
-- controllers para exponer estos resultados mediante rutas.
+| Ruta | Acceso | Funcionalidad |
+| --- | --- | --- |
+| `/tutor/basic/articles` | Permiso `access content` | Lista los 10 artículos publicados más recientes mediante un servicio personalizado. |
+| `/tutor/basic/article/{node}/reading-time` | Permiso `access content` | Convierte `{node}` en una entidad, muestra su contenido y calcula el tiempo de lectura a 200 palabras por minuto. |
+| `/tutor/basic/site-statistics` | Rol `administrator` | Muestra el total de usuarios y de nodos tipo página. |
+| `/tutor/basic/contact-form` | Formulario público en su implementación actual | Valida nombre, correo y mensaje; registra el contacto en el log de Drupal. |
+| `/tutor/basic/create-page` | Rol `administrator` y permiso `create page content` | Crea y publica una página, muestra un mensaje de éxito y redirige al nodo. |
 
-Los controllers de este segundo módulo aún no están incluidos, por lo que sus rutas representan trabajo pendiente.
+El servicio `drupal_tutor_basic.content_manager` concentra las consultas y el cálculo de lectura. Recibe `entity_type.manager` y `current_user` desde el contenedor de servicios. Los formularios también muestran inyección directa de `logger.factory` y `entity_type.manager`.
+
+La explicación completa del Sprint 1 está en [`docs/spring01.explain.md`](docs/spring01.explain.md).
+
+### `drupal_tutor_intermediate`
+
+Módulo del Sprint 2 presente en el repositorio. Amplía los ejercicios con:
+
+- formulario de configuración para guardar el tamaño de lote y el dominio VIP;
+- acceso personalizado a una zona VIP según el dominio del correo del usuario;
+- EntityQuery para encontrar artículos publicados aún no procesados;
+- Batch API para anteponer `[ACTUALIZADO]` al título de los artículos;
+- mensajes de progreso y resumen del procesamiento masivo.
+
+Sus rutas son:
+
+- `/admin/config/tutor/opciones`
+- `/tutor/intermedio/zona-vip`
+- `/tutor/intermedio/actualizar-nodos`
+
+> El código de `drupal_tutor_intermediate` está versionado, pero el módulo todavía no aparece habilitado en `config/sync/core.extension.yml`. En una instalación reconstruida desde la configuración hay que habilitarlo antes de usar sus rutas: `fin exec drush en drupal_tutor_intermediate -y`.
 
 ## Puesta en marcha
 
@@ -103,6 +126,9 @@ fin exec drush uli
 # Ver el estado de Drupal
 fin exec drush status
 
+# Habilitar el módulo del Sprint 2
+fin exec drush en drupal_tutor_intermediate -y
+
 # Exportar cambios hechos desde la interfaz
 fin exec drush cex -y
 
@@ -130,7 +156,11 @@ Los nodos, usuarios, archivos y envíos de Webform son contenido; no forman part
 ├── web/                         # Document root
 │   └── modules/custom/
 │       ├── drupal_practice/     # Ejemplos básicos completos
-│       └── drupal_tutor_basic/  # Ejercicios de servicios en progreso
+│       ├── drupal_tutor_basic/  # Sprint 1: servicios, controllers y formularios
+│       └── drupal_tutor_intermediate/ # Sprint 2: configuración, acceso y Batch API
+├── docs/
+│   └── spring01.explain.md       # Explicación técnica del Sprint 1
+├── exercs.md                     # Retos propuestos para practicar
 ├── composer.json                # Dependencias declaradas
 └── composer.lock                # Versiones instaladas y reproducibles
 ```
