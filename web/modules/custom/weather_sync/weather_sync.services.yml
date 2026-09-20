@@ -1,0 +1,22 @@
+services:
+  # 1. Cliente HTTP (Solo hace peticiones), traemos logger para mensajes de error.
+  weather_sync.api_client:
+    class: Drupal\weather_sync\Client\WeatherApiClient
+    arguments: ['@http_client', '@logger.factory']
+
+  # 2. Manager (Reglas de negocio), dependecias necesarias para ser el manager de la sincronización del clima.
+  weather_sync.manager:
+    class: Drupal\weather_sync\Service\WeatherSyncManager
+    arguments:
+      - '@weather_sync.api_client'
+      - '@entity_type.manager'
+      - '@logger.factory'
+      - '@cache.default'
+      - '@event_dispatcher'
+
+  # 3. Suscriptor de Eventos (Escucha la actualización del clima)
+  weather_sync.notification_subscriber:
+    class: Drupal\weather_sync\EventSubscriber\WeatherNotificationSubscriber
+    arguments: ['@logger.factory']
+    tags:
+      - { name: event_subscriber } # Esta etiqueta es MÁGICA, le dice a Drupal que esta clase escucha eventos.

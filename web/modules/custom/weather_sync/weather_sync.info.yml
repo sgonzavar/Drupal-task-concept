@@ -1,0 +1,8 @@
+name: 'Weather Sync Enterprise'
+type: module
+description: 'Sincronización avanzada de clima con API REST, Cache, Queue y Eventos.'
+core_version_requirement: ^10 || ^11
+package: Custom
+dependencies:
+  - drupal:node
+  - drupal:taxonomy

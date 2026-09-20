@@ -1,0 +1,63 @@
+<?php
+/**
+ * @file
+ * Funciones procedurales y Hooks para el módulo Weather Sync.
+ */
+
+/**
+ * Implements hook_cron().
+ *
+ * Este hook se dispara cuando corre el cron del sistema.
+ * Usamos la State API para asegurar que nuestra lógica pesada
+ * solo corra cada 5 horas.
+ */
+
+function weather_sync_cron() {
+  // Servicio State API para almacenar y recuperar datos volátiles del entorno.
+  $state = \Drupal::state();
+
+  // Timestamp normalizado de la solicitud actual de Drupal (sustituye a time()).
+  $time = \Drupal::time()->getRequestTime();
+
+  // Timestamp de la última sincronización. Por defecto 0 si nunca ha corrido.
+  $last_run = $state->get('weather_sync.last_city_sync', 0);
+
+  // Intervalo de 5 horas: 5 * 60 minutos * 60 segundos = 18000 segundos.
+  $interval = 18000;
+
+  // Evita la ejecución innecesaria si no ha transcurrido la ventana de tiempo.
+  if (($time - $last_run) >= $interval) {
+    try {
+      // Instancia del servicio cliente HTTP propio del módulo.
+      $api_client = \Drupal::service('weather_sync.api_client');
+
+      // Obtiene el listado completo de ciudades desde el endpoint remoto.
+      $cities = $api_client->get('/cities');
+
+      if ($cities) {
+        // Obtenemos la cola de procesamiento en segundo plano.
+        $queue = \Drupal::queue('weather_sync_city_queue');
+
+        // Encola cada ciudad individualmente para ser procesada por un QueueWorker.
+        foreach ($cities as $city_data) {
+          $queue->createItem($city_data);
+        }
+
+        // Se actualiza el timestamp únicamente cuando la carga a la cola fue exitosa.
+        $state->set('weather_sync.last_city_sync', $time);
+
+        \Drupal::logger('weather_sync')->info(
+          'Weather sync: Se agregaron @count ciudades a la cola para su procesamiento.',
+          ['@count' => count($cities)]
+        );
+      }
+    }
+    catch (\Exception $e) {
+      // Captura excepciones de red o servicio para evitar que el cron general falle.
+      \Drupal::logger('weather_sync')->error(
+        'Error durante la sincronización en cron: @message',
+        ['@message' => $e->getMessage()]
+      );
+    }
+  }
+}
