@@ -3,5 +3,5 @@ type: module
 description: 'Configuration, Batch API, EntityQuery Advanced ando custom access'
 package: Tutor
 core_version_requirement: ^10 || ^9
-dependences:
+dependencies:
   - drupal_tutor_basic

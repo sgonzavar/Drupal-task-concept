@@ -1,0 +1,27 @@
+<?php
+
+/**
+ * @file
+ * Hook implementations for drupal_tutor_intermediate.
+ */
+
+use Drupal\Core\Config\ConfigFactoryInterface;
+
+/**
+ * Implements hook_install().
+ */
+function drupal_tutor_intermediate_install() {
+  // Crear configuración por defecto al instalar el módulo
+  \Drupal::service('config.factory')->getEditable('drupal_tutor_intermediate.settings')
+    ->set('batch_limit', 50)
+    ->set('vip_domain', '@mipropio.com')
+    ->save(TRUE); // TRUE = confía en que es instalación nueva
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function drupal_tutor_intermediate_uninstall() {
+  // Limpiar configuración al desinstalar
+  \Drupal::service('config.storage')->delete('drupal_tutor_intermediate.settings');
+}

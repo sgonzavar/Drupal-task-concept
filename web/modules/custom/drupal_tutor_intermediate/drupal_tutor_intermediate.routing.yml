@@ -11,12 +11,11 @@ drupal_tutor_intermediate.settings:
 drupal_tutor_intermediate.vip_area:
   path: '/tutor/intermedio/zona-vip'
   defaults:
-    # Usamos un controlador simple del módulo
     _controller: 'Drupal\drupal_tutor_intermediate\Controller\VipController::content'
     _title: 'Zona VIP'
   requirements:
-    # AQUÍ DELEGAMOS LA SEGURIDAD AL MÉTODO DE NUESTRO SERVICIO
-    _custom_access: '\Drupal\drupal_tutor_intermediate\Access\VipAccessCheck::access'
+    # Usamos el servicio definido en services.yml (inyecta dependencias correctamente)
+    _custom_access: 'drupal_tutor_intermediate.custom_access:access'
 
 # 3. Ruta para lanzar el Formulario de Batch
 drupal_tutor_intermediate.batch_update:

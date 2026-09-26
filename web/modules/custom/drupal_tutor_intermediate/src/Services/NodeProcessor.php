@@ -12,20 +12,21 @@ class NodeProcessor {
 
   public function __construct(EntityTypeManagerInterface $entityTypeManager, LoggerChannelFactoryInterface $logger_factory) {
     $this->entityTypeManager = $entityTypeManager;
-    $this->logger = $logger_factory;
+    // IMPORTANTE: get() para obtener el canal de log específico
+    $this->logger = $logger_factory->get('drupal_tutor_intermediate');
   }
 
   //EJERCICIO: Entity Query Avanzado
   public function getNodesToProcess(): array {
-    $storage = $this->entityTypeManager->getStorage('node'); //Traemos nodos
+    $storage = $this->entityTypeManager->getStorage('node');
 
-    //Consulta avanzada: Articulos publicados, cuyo titulo  no contenga "[ACTUALIZADO]"
-    $quey = $storage->getQuery()
+    $query = $storage->getQuery()
       ->condition('type', 'article')
       ->condition('status', 1)
-      ->condition('title', '[ACTUALIZADO]', 'NOT LIKE')
+      // Los corchetes [] son especiales en LIKE, los escapamos con [[] y []]
+      ->condition('title', '%[[]ACTUALIZADO[]]%', 'NOT LIKE')
       ->accessCheck(FALSE);
-    return $quey->execute();
+    return $query->execute();
   }
 
   //EJERCICIO: Callback de las Batch API
@@ -33,7 +34,6 @@ class NodeProcessor {
   //Drupal reconstruye el estado en cada peticion AJAX
 
   public static function processBatchItem($nid, $context) {
-    // Como es estatico, usamos entityTypeManager() para acceder al servicio
     $storage = \Drupal::entityTypeManager()->getStorage('node');
     $node = $storage->load($nid);
 
@@ -42,7 +42,6 @@ class NodeProcessor {
       $node->setTitle('[ACTUALIZADO] ' . $old_title);
       $node->save();
 
-      //Guardar mensajes para mostrarlos al usuario mientras carga la barra
       $context['message'] = 'Actualizando nodo ID: ' . $nid;
       $context['results'][] = $nid;
     }

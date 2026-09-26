@@ -67,7 +67,7 @@ class BatchUpdateForm extends FormBase {
       }
     }
 
-    //Decimos a Drupal que ejecute este batch en la plantilla de carga
-    batch_set($batch->toArray());
+    // Forma correcta en Drupal 10+ para formularios
+    $form_state->set('batch', $batch->toArray());
   }
 }
