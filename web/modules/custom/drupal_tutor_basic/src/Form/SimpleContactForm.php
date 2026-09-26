@@ -29,19 +29,19 @@ class SimpleContactForm extends FormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $form['name'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Tu Nombre'),
+      '#title' => $this->t('Your Name'),
       '#required' => TRUE,
     ];
 
     $form['email'] = [
       '#type' => 'email',
-      '#title' => $this->t('Correo Electrónico'),
+      '#title' => $this->t('Email Address'),
       '#required' => TRUE,
     ];
 
     $form['message'] = [
       '#type' => 'textarea',
-      '#title' => $this->t('Mensaje o Sugerencia'),
+      '#title' => $this->t('Message or Suggestion'),
       '#required' => TRUE,
     ];
 
@@ -51,33 +51,33 @@ class SimpleContactForm extends FormBase {
 
     $form['actions']['submit'] = [
       '#type' => 'submit',
-      '#value' => $this->t('Enviar Mensaje'),
+      '#value' => $this->t('Send Message'),
       '#button_type' => 'primary',
     ];
 
     return $form;
   }
 
-  // Verificar que el correo pertenezca a un dominio especifico
+  // Validar formato de email
   public function validateForm(array &$form, FormStateInterface $form_state) {
     $email = $form_state->getValue('email');
-    if(!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-      $form_state->setErrorByName('email', $this->t('format email incorrect'));
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+      $form_state->setErrorByName('email', $this->t('Invalid email format'));
     }
   }
 
-  // registrar el mensaje en los logs del sistema
+  // Registrar el mensaje en los logs del sistema
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $name = $form_state->getValue('name');
     $email = $form_state->getValue('email');
 
-    // registrar en la db de Logs (admin/reports/dblog)
-    $this->logger->info('New message to contact from @name (@email)', [
+    // Registrar en la DB de Logs (admin/reports/dblog)
+    $this->logger->info('New contact message from @name (@email)', [
       '@name' => $name,
       '@email' => $email,
     ]);
 
-    $this->messenger()->addStatus($this->t('Tks @name add your message', [
+    $this->messenger()->addStatus($this->t('Thanks @name for your message', [
       '@name' => $name,
     ]));
   }

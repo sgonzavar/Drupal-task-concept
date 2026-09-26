@@ -1,4 +1,3 @@
-
 # ejemplo 01 (GET): lista simple de articulos usando el servicio content_manager_services
 drupal_tutor_basic.latest_articles:
   path: 'tutor/basic/articles'
@@ -12,7 +11,8 @@ drupal_tutor_basic.latest_articles:
 drupal_tutor_basic.node_reading_time:
   path: 'tutor/basic/article/{node}/reading-time'
   defaults:
-    _controller: '\Drupal\drupal_tutor_basic\Controller\BasicController::Read_time'
+    _controller: '\Drupal\drupal_tutor_basic\Controller\BasicController::readTime'
+    _title: 'Reading Time'
   requirements:
     _permission: 'access content'
   options:
@@ -29,14 +29,14 @@ drupal_tutor_basic.site_statistics:
   requirements:
     _role: 'administrator'
 
-# ejemplo 04(POST/FORM): Formulario sencillo contanto / sugerencias
+# ejemplo 04(POST/FORM): Formulario sencillo contacto / sugerencias
 drupal_tutor_basic.contact_form:
   path: 'tutor/basic/contact-form'
   defaults:
     _form: '\Drupal\drupal_tutor_basic\Form\SimpleContactForm'
     _title: 'Contact Form'
-    requirements:
-      _permission: 'access content'
+  requirements:
+    _permission: 'access content'
 
 
 # ejemplo 05 (POST/FORM): Form API interactuando con entidades (Creacion de Pagina)
@@ -46,5 +46,6 @@ drupal_tutor_basic.create_page:
     _form: '\Drupal\drupal_tutor_basic\Form\FastPageCreateForm'
     _title: 'Create Fast Page'
   requirements:
+    # _permission Y _role = AND (ambos requeridos). Cambia a _custom_access si quieres OR.
     _permission: 'create page content'
     _role: 'administrator'

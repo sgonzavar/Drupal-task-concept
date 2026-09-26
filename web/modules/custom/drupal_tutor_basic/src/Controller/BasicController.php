@@ -6,6 +6,7 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\drupal_tutor_basic\Services\ContentManagerService;
 use Drupal\node\NodeInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Component\Utility\Xss;
 
 class BasicController extends ControllerBase {
 
@@ -22,7 +23,7 @@ class BasicController extends ControllerBase {
   }
 
   public function listArticles() {
-    $nodes = $this->contentManagerService->getLatesrArticles(10);
+    $nodes = $this->contentManagerService->getLatestArticles(10);
     $items = [];
     foreach ($nodes as $item_node) {
       $items[] = $item_node->toLink()->toString();
@@ -37,21 +38,31 @@ class BasicController extends ControllerBase {
   }
 
 
-  // ejemplo 02. Parametros + logica, lectura de articulos
-  public function Read_time(NodeInterface $node) {
+  // Ejemplo 02. Parametros + logica, tiempo de lectura de articulos
+  public function readTime(NodeInterface $node) {
+    // Verificar que el nodo tenga campo body
+    if (!$node->hasField('body') || $node->get('body')->isEmpty()) {
+      return [
+        '#markup' => $this->t('This node does not have a body field.'),
+      ];
+    }
+
     $body = $node->get('body')->value ?? '';
     $reading_time = $this->contentManagerService->calculateReadingTime($body);
 
+    // Filtrar HTML para evitar XSS
+    $safe_body = Xss::filter($body, ['p', 'br', 'strong', 'em', 'ul', 'ol', 'li']);
+
     return [
-      '#markup' => "<p><strong>title:</strong> {$node->getTitle()} <br> {$body}</p> <p>Read time: {$reading_time} minutos</p>",
+      '#markup' => '<p><strong>' . $this->t('Title:') . '</strong> ' . $node->getTitle() . '<br>' . $safe_body . '</p><p>' . $this->t('Read time: @minutes minutes', ['@minutes' => $reading_time]) . '</p>',
     ];
   }
 
-  // ejemplo 03. Estadisticas del sitio
+  // Ejemplo 03. Estadisticas del sitio
   public function getSiteStatistics() {
-    $stats = $this->contentManagerService->gestSiteStats();
+    $stats = $this->contentManagerService->getSiteStats();
     return [
-      '#markup' => "<p>Users: {$stats['total_users']}</p>, <p>Page Devel Gen: {$stats['total_pages']}</p>"
+      '#markup' => '<p>' . $this->t('Users: @total_users', ['@total_users' => $stats['total_users']]) . '</p><p>' . $this->t('Pages (Devel Gen): @total_pages', ['@total_pages' => $stats['total_pages']]) . '</p>'
     ];
   }
 }

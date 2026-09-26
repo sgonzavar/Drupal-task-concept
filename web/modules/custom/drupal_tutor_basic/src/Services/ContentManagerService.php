@@ -11,17 +11,17 @@ class ContentManagerService {
   protected $currentUser;
 
 
- // inyectar dependencias necesarias para el servicio, entitades y usuario actual
+  // Inyectar dependencias necesarias para el servicio, entidades y usuario actual
   public function __construct(EntityTypeManagerInterface $entityTypeManager,
     AccountProxyInterface $currentUser) {
     $this->entityTypeManager = $entityTypeManager;
     $this->currentUser = $currentUser;
   }
 
-  // ejemplo 01. Obtener los ultimos N articulos publicados
-  public function getLatesrArticles(int $limit=5): array {
+  // Ejemplo 01. Obtener los ultimos N articulos publicados
+  public function getLatestArticles(int $limit = 5): array {
     $storage = $this->entityTypeManager->getStorage('node');
-    $nid = $storage->getQuery()
+    $nids = $storage->getQuery()
       ->condition('type', 'article')
       ->condition('status', 1)
       ->sort('created', 'DESC')
@@ -29,18 +29,18 @@ class ContentManagerService {
       ->accessCheck(TRUE)
       ->execute();
 
-    return $storage->loadMultiple($nid);
+    return $storage->loadMultiple($nids);
   }
 
-  // ejemplo 02. Calcular el tiempo de lectura de un nodo
+  // Ejemplo 02. Calcular el tiempo de lectura de un nodo
   public function calculateReadingTime(string $text): int {
     $words = str_word_count(strip_tags($text));
-    $minute = ceil($words / 200); // Asumiendo una velocidad de lectura promedio de 100 palabras por minuto
-    return $minute;
+    $minutes = ceil($words / 200); // Asumiendo una velocidad de lectura promedio de 200 palabras por minuto
+    return $minutes;
   }
 
-  // ejemplo 03. Estadisticas basicas del sitio
-  public function gestSiteStats(): array {
+  // Ejemplo 03. Estadisticas basicas del sitio
+  public function getSiteStats(): array {
 
     $total_users = $this->entityTypeManager->getStorage('user')->getQuery()
       ->accessCheck(FALSE)
@@ -58,7 +58,5 @@ class ContentManagerService {
       'total_pages' => $total_pages
     ];
   }
-
-
 
 }

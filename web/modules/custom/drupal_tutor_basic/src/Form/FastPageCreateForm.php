@@ -5,6 +5,7 @@ namespace Drupal\drupal_tutor_basic\Form;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\filter\Entity\FilterFormat;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class FastPageCreateForm extends FormBase {
@@ -45,11 +46,10 @@ class FastPageCreateForm extends FormBase {
       '#value' => $this->t('Create and publish'),
     ];
 
-    dump($form);
     return $form;
   }
 
-  //Validacion (Antes submit)
+  // Validacion (Antes submit)
   public function validateForm(array &$form, FormStateInterface $form_state) {
     $title = $form_state->getValue('title');
     if (strlen($title) < 5) {
@@ -57,23 +57,27 @@ class FastPageCreateForm extends FormBase {
     }
   }
 
-  //Ejecucion (POST Real)
+  // Ejecucion (POST Real)
   public function submitForm(array &$form, FormStateInterface $form_state) {
+    // Obtener formato de texto por defecto (fallback) en lugar de hardcodear 'basic_html'
+    $fallback_format = filter_fallback_format();
+    $format_id = $fallback_format ? $fallback_format->id() : 'basic_html';
+
     $node = $this->entityTypeManager->getStorage('node')->create([
       'type' => 'page',
       'title' => $form_state->getValue('title'),
       'body' => [
         'value' => $form_state->getValue('body'),
-        'format' => 'basic_html',
+        'format' => $format_id,
       ],
-      'status' => 1, //publish
+      'status' => 1, // Published
     ]);
 
-    //ejecucion del guardado en DB
+    // Ejecucion del guardado en DB
     $node->save();
 
-    //Mensaje exito nativo
-    $this->messenger()->addStatus($this->t('page "@title" has been created. (ID: @nid)', [
+    // Mensaje exito nativo
+    $this->messenger()->addStatus($this->t('Page "@title" has been created. (ID: @nid)', [
       '@title' => $node->getTitle(),
       '@nid' => $node->id(),
     ]));
