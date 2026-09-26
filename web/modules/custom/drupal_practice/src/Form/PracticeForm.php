@@ -4,15 +4,17 @@ namespace Drupal\drupal_practice\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class PracticeForm extends FormBase {
-
 
   public function getFormId(): string {
     return 'drupal_practice_form';
   }
 
+  public static function create(ContainerInterface $container) {
+    return new static();
+  }
 
   public function buildForm(
     array $form,
@@ -33,13 +35,13 @@ class PracticeForm extends FormBase {
 
     $form['technology'] = [
       '#type' => 'select',
-      '#title' => $this->t('Tech fav'),
+      '#title' => $this->t('Favorite technology'),
       '#options' => [
-        'drupal' => 'Drupal',
-        'lit' => 'Lit',
-        'angular' => 'Angular',
-        'nestjs' => 'NestJS',
-				'react' => 'React',
+        'drupal' => $this->t('Drupal'),
+        'lit' => $this->t('Lit'),
+        'angular' => $this->t('Angular'),
+        'nestjs' => $this->t('NestJS'),
+        'react' => $this->t('React'),
       ],
       '#required' => TRUE,
     ];
@@ -48,6 +50,8 @@ class PracticeForm extends FormBase {
       '#type' => 'number',
       '#title' => $this->t('Age'),
       '#required' => TRUE,
+      '#min' => 18,
+      '#max' => 120,
     ];
 
     $form['actions'] = [
@@ -56,36 +60,38 @@ class PracticeForm extends FormBase {
 
     $form['actions']['submit'] = [
       '#type' => 'submit',
-      '#value' => $this->t('Send'),
+      '#value' => $this->t('Submit'),
     ];
 
     return $form;
   }
 
-
   public function validateForm(array &$form, FormStateInterface $form_state): void {
+    $values = $form_state->getValues();
 
-    $formSubmit = $form_state->getValues();
-		// dump($form_state->getValues()); extraer todos los datos en array 
-
-    if ($formSubmit['age'] < 18) {
+    if ($values['age'] < 18) {
       $form_state->setErrorByName(
         'age',
-        $this->t('More to 18 age')
+        $this->t('You must be at least 18 years old')
       );
     }
 
+    $email = $values['email'];
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+      $form_state->setErrorByName(
+        'email',
+        $this->t('Invalid email format')
+      );
+    }
   }
 
-
-  public function submitForm(array &$form, FormStateInterface $form_state,): void {
-
+  public function submitForm(array &$form, FormStateInterface $form_state): void {
     $name = $form_state->getValue('name');
     $technology = $form_state->getValue('technology');
 
     $this->messenger()->addStatus(
       $this->t(
-        'Hi @name. you tech fav is @technology.',
+        'Hi @name, your favorite technology is @technology.',
         [
           '@name' => $name,
           '@technology' => $technology,

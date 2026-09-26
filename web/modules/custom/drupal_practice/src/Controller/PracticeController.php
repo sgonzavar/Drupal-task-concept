@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace Drupal\drupal_practice\Controller;
 
@@ -10,7 +10,7 @@ class PracticeController extends ControllerBase {
   public function hello(string $name): array {
     return [
       '#markup' => $this->t(
-        'Hola @name, este mensaje viene desde un Controller de Drupal.',
+        'Hello @name, this message comes from a Drupal Controller.',
         [
           '@name' => $name,
         ]
@@ -19,35 +19,35 @@ class PracticeController extends ControllerBase {
   }
 
   public function renderArray(): array {
-    return[
+    return [
       'intro' => [
         '#type' => 'container',
-        
+
         'title' => [
           '#type' => 'html_tag',
           '#tag' => 'h2',
-          '#value' => $this->t('Technology im study or im use'),
+          '#value' => $this->t('Technologies I study or use'),
         ],
 
         'description' => [
-          '#markup' => $this->t('This content buinding with render arrays') 
+          '#markup' => $this->t('This content is built with render arrays')
         ]
       ],
 
       'technologies' => [
         '#theme' => 'item_list',
-        '#title' => $this->t('Tecnologías'),
+        '#title' => $this->t('Technologies'),
         '#items' => [
-          'Drupal',
-          'Lit',
-          'Angular',
-          'NestJS',
+          $this->t('Drupal'),
+          $this->t('Lit'),
+          $this->t('Angular'),
+          $this->t('NestJS'),
         ],
       ],
 
       'link' => [
         '#type' => 'link',
-        '#title' => $this->t('Ir a Drupal.org'),
+        '#title' => $this->t('Go to Drupal.org'),
         '#url' => Url::fromUri('https://www.drupal.org'),
         '#attributes' => [
           'target' => '_blank',
@@ -56,4 +56,3 @@ class PracticeController extends ControllerBase {
     ];
   }
 }
-

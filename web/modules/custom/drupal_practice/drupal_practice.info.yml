@@ -1,5 +1,9 @@
 name: 'Drupal Practice'
 type: module
-description: 'Excersism Drupal'
+description: 'Exercises for Drupal module development practice'
 package: Custom
 core_version_requirement: ^10 || ^11
+dependencies:
+  - block
+  - logger
+  - views

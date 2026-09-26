@@ -5,12 +5,11 @@ use Drupal\views\Plugin\views\query\QueryPluginBase;
 
 /**
  * Implements hook_views_query_alter().
+ *
+ * Alters the query for the "practice_content" view to exclude node ID 17.
+ * Note: The view "practice_content" must exist in the system for this to work.
  */
-function drupal_practice_views_query_alter(ViewExecutable $view, QueryPluginBase $query,): void {
-
-//   dump($view);
-//   dump($query);
-
+function drupal_practice_views_query_alter(ViewExecutable $view, QueryPluginBase $query): void {
   if ($view->id() !== 'practice_content') {
     return;
   }
@@ -21,5 +20,4 @@ function drupal_practice_views_query_alter(ViewExecutable $view, QueryPluginBase
     17,
     '<>'
   );
-
 }
