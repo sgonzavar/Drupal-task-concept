@@ -1,6 +1,6 @@
 # Drupal Task Concepts
 
-Proyecto de práctica para aprender desarrollo con Drupal mediante ejemplos progresivos de módulos personalizados: rutas, controllers, render arrays, Form API, entidades, servicios, inyección de dependencias, ParamConverter, control de acceso, configuración y Batch API.
+Proyecto de práctica para aprender desarrollo con Drupal mediante ejemplos progresivos de módulos personalizados: rutas, controllers, render arrays, Form API, entidades, servicios, inyección de dependencias, ParamConverter, control de acceso, configuración, Batch API, Queue API, Cache API, Event Subscribers y comunicación HTTP.
 
 El sitio usa Drupal 10, Composer y Docksal. Su configuración se versiona en `config/sync`, por lo que una instalación nueva puede reconstruirse con los módulos y ajustes actuales.
 
@@ -38,14 +38,14 @@ También están configurados tipos de contenido para artículos y páginas, tipo
 Módulo activo que reúne ejercicios básicos de la API de Drupal:
 
 - **Controller y parámetros de ruta:** responde con un saludo personalizado.
-  - `/drupal-practice/hello`
+  - `/drupal-practice/hello` (usa default "Drupal")
   - `/drupal-practice/hello/{name}`
 - **Render arrays:** crea un contenedor, encabezado, lista temática y enlace sin escribir HTML directamente.
   - `/drupal-practice/render-array`
-- **Form API:** formulario con nombre, correo, tecnología favorita y validación de edad mínima.
+- **Form API:** formulario con nombre, correo, tecnología favorita y validación de edad mínima (≥18).
   - `/drupal-practice/form`
-- **Plugin de bloque:** bloque `Drupal Practice Block`, disponible para ubicar desde la administración de bloques.
-- **Event subscriber:** escucha `ConfigEvents::SAVE` y registra en el log el nombre de la configuración guardada.
+- **Plugin de bloque:** bloque "Drupal Practice Block", disponible para ubicar desde la administración de bloques (categoría "Custom").
+- **Event subscriber:** escucha `ConfigEvents::SAVE` y registra en el log el nombre de la configuración guardada (solo configs `drupal_practice.*`).
 - **Menú:** agrega un enlace al formulario en el menú principal.
 
 ### `drupal_tutor_basic`
@@ -54,11 +54,11 @@ Módulo del Sprint 1, activo en la configuración exportada. Practica servicios 
 
 | Ruta | Acceso | Funcionalidad |
 | --- | --- | --- |
-| `/tutor/basic/articles` | Permiso `access content` | Lista los 10 artículos publicados más recientes mediante un servicio personalizado. |
-| `/tutor/basic/article/{node}/reading-time` | Permiso `access content` | Convierte `{node}` en una entidad, muestra su contenido y calcula el tiempo de lectura a 200 palabras por minuto. |
+| `/tutor/basic/articles` | Permiso `access content` | Lista los 10 artículos publicados más recientes mediante un servicio personalizado (`ContentManagerService::getLatestArticles`). |
+| `/tutor/basic/article/{node}/reading-time` | Permiso `access content` | Convierte `{node}` en una entidad (ParamConverter), muestra su contenido filtrado (XSS safe) y calcula el tiempo de lectura a 200 palabras por minuto. |
 | `/tutor/basic/site-statistics` | Rol `administrator` | Muestra el total de usuarios y de nodos tipo página. |
-| `/tutor/basic/contact-form` | Formulario público en su implementación actual | Valida nombre, correo y mensaje; registra el contacto en el log de Drupal. |
-| `/tutor/basic/create-page` | Rol `administrator` y permiso `create page content` | Crea y publica una página, muestra un mensaje de éxito y redirige al nodo. |
+| `/tutor/basic/contact-form` | Permiso `access content` | Valida nombre, correo (formato válido) y mensaje; registra el contacto en el log de Drupal (`dblog`). |
+| `/tutor/basic/create-page` | Rol `administrator` y permiso `create page content` | Crea y publica una página usando formato de texto fallback, muestra un mensaje de éxito y redirige al nodo. |
 
 El servicio `drupal_tutor_basic.content_manager` concentra las consultas y el cálculo de lectura. Recibe `entity_type.manager` y `current_user` desde el contenedor de servicios. Los formularios también muestran inyección directa de `logger.factory` y `entity_type.manager`.
 
@@ -68,19 +68,51 @@ La explicación completa del Sprint 1 está en [`docs/spring01.explain.md`](docs
 
 Módulo del Sprint 2 presente en el repositorio. Amplía los ejercicios con:
 
-- formulario de configuración para guardar el tamaño de lote y el dominio VIP;
-- acceso personalizado a una zona VIP según el dominio del correo del usuario;
-- EntityQuery para encontrar artículos publicados aún no procesados;
-- Batch API para anteponer `[ACTUALIZADO]` al título de los artículos;
-- mensajes de progreso y resumen del procesamiento masivo.
+- Formulario de configuración para guardar el tamaño de lote (`batch_limit`) y el dominio VIP (`vip_domain`).
+- Acceso personalizado a una zona VIP según el dominio del correo del usuario (`_custom_access` con servicio inyectado).
+- EntityQuery avanzada para encontrar artículos publicados aún no procesados (sin `[ACTUALIZADO]` en el título).
+- Batch API para anteponer `[ACTUALIZADO]` al título de los artículos en lotes configurables.
+- Mensajes de progreso y resumen del procesamiento masivo.
+- `hook_install()` / `hook_uninstall()` para crear/limpiar configuración por defecto al instalar/desinstalar.
 
 Sus rutas son:
 
-- `/admin/config/tutor/opciones`
-- `/tutor/intermedio/zona-vip`
-- `/tutor/intermedio/actualizar-nodos`
+- `/admin/config/tutor/opciones` — Formulario de configuración
+- `/tutor/intermedio/zona-vip` — Área VIP (acceso por dominio de email)
+- `/tutor/intermedio/actualizar-nodos` — Actualizador masivo (Batch API)
 
-> El código de `drupal_tutor_intermediate` está versionado, pero el módulo todavía no aparece habilitado en `config/sync/core.extension.yml`. En una instalación reconstruida desde la configuración hay que habilitarlo antes de usar sus rutas: `fin exec drush en drupal_tutor_intermediate -y`.
+> El módulo está completo y funcional. En una instalación reconstruida desde la configuración: `fin exec drush en drupal_tutor_intermediate -y`.
+
+### `weather_sync`
+
+Módulo de sincronización avanzada de clima que demuestra arquitectura enterprise: **Cliente HTTP + Manager de negocio + Queue API + Cache API + Event Subscriber + Block con AJAX**.
+
+**Arquitectura:**
+
+| Componente | Clase | Responsabilidad |
+| --- | --- | --- |
+| Cliente HTTP | `WeatherApiClient` | Peticiones GET/POST/PUT/DELETE a API REST externa, logging de errores, timeout 10s |
+| Manager | `WeatherSyncManager` | Orquesta: cache (15 min), fallback a BD, crea/actualiza nodos `weather_news`, taxonomía `weather_type`, dispara evento `WeatherUpdatedEvent` |
+| Queue Worker | `hook_cron()` + Queue API | Cada 5 horas encola ciudades desde `/cities` endpoint para procesamiento en background |
+| Block AJAX | `WeatherInteractiveBlock` + `WeatherDashboardForm` | Selector de ciudad (taxonomy `weather_city`) → carga clima vía AJAX → renderiza nodo `weather_news` en teaser |
+| Event Subscriber | `WeatherNotificationSubscriber` | Escucha `WeatherUpdatedEvent` para notificaciones/logs (pendiente implementar clase) |
+
+**Dependencias declaradas:** `node`, `taxonomy` (crea vocabularios `weather_city` y `weather_type` al vuelo).
+
+**Endpoints de la API externa (ficticios):**
+
+- `GET /cities` — Lista de ciudades a sincronizar
+- `GET /weather/{city}` — Clima actual de una ciudad
+
+**Configuración requerida (no versionada, se crea dinámicamente):**
+
+- Content type: `weather_news` (campos: `field_temperature`, `field_weather_type`, `field_city`)
+- Vocabulario: `weather_city` (términos = ciudades disponibles)
+- Vocabulario: `weather_type` (condiciones climáticas creadas al vuelo)
+
+**Nota:** El módulo tiene algunos *bugs menores* (referencia a `WeatherInteractiveForm` inexistente en el block, `WeatherNotificationSubscriber` no implementado, typos en `$base_ulr`/`filed_weather_type`). Sirve como base para practicar debugging y completado.
+
+---
 
 ## Puesta en marcha
 
@@ -129,6 +161,9 @@ fin exec drush status
 # Habilitar el módulo del Sprint 2
 fin exec drush en drupal_tutor_intermediate -y
 
+# Habilitar weather_sync (requiere tipos de entidad y vocabularios)
+fin exec drush en weather_sync -y
+
 # Exportar cambios hechos desde la interfaz
 fin exec drush cex -y
 
@@ -155,12 +190,22 @@ Los nodos, usuarios, archivos y envíos de Webform son contenido; no forman part
 ├── config/sync/                 # Configuración exportada de Drupal
 ├── web/                         # Document root
 │   └── modules/custom/
-│       ├── drupal_practice/     # Ejemplos básicos completos
+│       ├── drupal_practice/     # Ejemplos básicos completos (Sprint 0)
 │       ├── drupal_tutor_basic/  # Sprint 1: servicios, controllers y formularios
-│       └── drupal_tutor_intermediate/ # Sprint 2: configuración, acceso y Batch API
+│       ├── drupal_tutor_intermediate/ # Sprint 2: config, acceso, Batch API
+│       └── weather_sync/        # Sprint 3/Enterprise: HTTP Client, Queue, Cache, Events, AJAX
 ├── docs/
 │   └── spring01.explain.md       # Explicación técnica del Sprint 1
 ├── exercs.md                     # Retos propuestos para practicar
 ├── composer.json                # Dependencias declaradas
 └── composer.lock                # Versiones instaladas y reproducibles
 ```
+
+## Retos propuestos
+
+Ver [`exercs.md`](exercs.md) para ejercicios adicionales:
+
+- Completar `weather_sync`: implementar `WeatherNotificationSubscriber`, QueueWorker, fixes de typos.
+- Añadir tests (PHPUnit/Kernel) a `drupal_tutor_basic` y `drupal_tutor_intermediate`.
+- Implementar `hook_help()` en cada módulo.
+- Migrar `drupal_practice` a `Drupal\Core\Block\Attribute\Block` (ya hecho) y `#[Route]` attributes.
