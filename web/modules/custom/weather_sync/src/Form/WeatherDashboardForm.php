@@ -13,10 +13,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class WeatherDashboardForm extends FormBase {
 
   protected WeatherSyncManager $weatherManager;
-
   protected EntityTypeManagerInterface $entityTypeManager;
 
-  public function __construct(WeatherSyncManager $weather_manager, EntityTypeManagerInterface $entity_type_manager) {
+  public function __construct(
+    WeatherSyncManager $weather_manager,
+    EntityTypeManagerInterface $entity_type_manager) {
     $this->weatherManager = $weather_manager;
     $this->entityTypeManager = $entity_type_manager;
   }
@@ -34,24 +35,23 @@ class WeatherDashboardForm extends FormBase {
 
   public function buildForm(array $form, FormStateInterface $form_state) {
     $options = [];
-    $terms = $this->entityTypeManager->getStorage('taxonomy_term')
-      ->loadTree('weather_city');
+    $terms = $this->entityTypeManager->getStorage('taxonomy_term')->loadTree('weather_city');
 
     foreach ($terms as $term) {
-      $options[$term->tid()] = $term->name;
+      $options[$term->tid] = $term->name;
     }
 
     $form['city_selector'] = [
       '#type' => 'select',
-      '#title' => $this->t('Selecciona una ciudad'),
-      '#empty_option' => $this->t('- seleccione -'),
+      '#title' => $this->t('Select a city'),
+      '#empty_option' => $this->t('- Select -'),
       '#options' => $options,
       '#ajax' => [
         'callback' => '::updateDashboardAjax',
         'wrapper' => 'weather-results-wrapper',
         'progress' => [
           'type' => 'throbber',
-          'message' => $this->t('Loading...'),
+          'message' => $this->t('finding weather results...'),
         ],
       ],
     ];
@@ -60,9 +60,11 @@ class WeatherDashboardForm extends FormBase {
       '#type' => 'container',
       '#attributes' => ['id' => 'weather-results-wrapper'],
     ];
+
+    return $form;
   }
 
-  public function updateDashboardAjax(array $form, FormStateInterface $form_state) {
+  public function updateDashboardAjax(array &$form, FormStateInterface $form_state) {
     $tid = $form_state->getValue('city_selector');
 
     if (empty($tid)) {
@@ -70,11 +72,11 @@ class WeatherDashboardForm extends FormBase {
       return $form['results_container'];
     }
 
-    // Obtener el nombre de la ciudad apartir del ID de la taxonomia
+    // Obtenemos el nombre de la ciudad a partir del ID de taxonomía
     $term = $this->entityTypeManager->getStorage('taxonomy_term')->load($tid);
     $city_name = $term->getName();
 
-    // consultar el manager
+    // Consultamos al Manager
     $node = $this->weatherManager->pullWeather($city_name);
 
     if ($node) {
@@ -82,15 +84,15 @@ class WeatherDashboardForm extends FormBase {
       $form['results_container']['content'] = $view_builder->view($node, 'teaser');
     }
     else {
-      $form['results_container']['#markup'] = '<div class="messages messages--error">'
-        . $this->t('Error to call external API') . '</div>';
+      $form['results_container']['#markup'] = '<div class="messages messages--error">' .
+        $this->t('Error API call.') . '</div>';
     }
 
     return $form['results_container'];
   }
 
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    // formulario administrado 100% AJAX
+    // Formulario administrado 100% por AJAX.
   }
 
 }

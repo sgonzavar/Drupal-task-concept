@@ -14,13 +14,9 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 class WeatherSyncManager {
 
   protected WeatherApiClient $apiClient;
-
   protected EntityTypeManagerInterface $entityTypeManager;
-
   protected CacheBackendInterface $cacheBackend;
-
   protected EventDispatcherInterface $eventDispatcher;
-
   protected $logger;
 
   public function __construct(

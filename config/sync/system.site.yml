@@ -1,9 +1,9 @@
 _core:
   default_config_hash: ijfbzDTN4CbE7Sr-6ubWzy_t1vH4OtU1doNCLssVz-4
 langcode: en
-uuid: 93441dca-d92b-409a-a356-1d1765704e32
-name: 'My Drupal 9 Site'
-mail: admin@example.com
+uuid: 422d3085-de2b-498c-a347-0f3544dbf124
+name: 'task concepts'
+mail: taskconcepts@email.com
 slogan: ''
 page:
   403: ''

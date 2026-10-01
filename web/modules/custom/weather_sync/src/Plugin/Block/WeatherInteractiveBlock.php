@@ -19,7 +19,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class WeatherInteractiveBlock extends BlockBase implements ContainerFactoryPluginInterface {
 
-  protected FormBuilderInterfacer  $formBuilder;
+  protected FormBuilderInterface $formBuilder;
 
   public function __construct(array $configuration, $plugin_id, $plugin_definition, FormBuilderInterface $form_builder) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
@@ -36,6 +36,6 @@ class WeatherInteractiveBlock extends BlockBase implements ContainerFactoryPlugi
   }
 
   public function build() {
-    return $this->formBuilder->getForm('Drupal\weather_sync\Form\WeatherInteractiveForm');
+    return $this->formBuilder->getForm('\Drupal\weather_sync\Form\WeatherDashboardForm');
   }
 }
