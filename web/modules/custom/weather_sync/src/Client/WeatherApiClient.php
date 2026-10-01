@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\weather_sync\client;
+namespace Drupal\weather_sync\Client;
 
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\RequestException;
@@ -14,8 +14,8 @@ class WeatherApiClient {
   protected ClientInterface $httpClient;
   protected $logger;
 
-  //ULR base de la API (ficticia)
-  protected string $base_ulr = 'https://api.tu-servidor-clima.com/v1';
+  // URL base de la API (ficticia)
+  protected string $base_url = 'https://api.tu-servidor-clima.com/v1';
 
   public function __construct(ClientInterface $http_client, LoggerChannelInterface $logger_factory) {
     $this->httpClient = $http_client;
@@ -25,17 +25,17 @@ class WeatherApiClient {
   /**
    * Petición base centralizada.
    */
-  protected function request(string $method, string $endoint, array $options = []): ?array {
-    $url = $this->base_ulr . $endoint;
+  protected function request(string $method, string $endpoint, array $options = []): ?array {
+    $url = $this->base_url . $endpoint;
     $options['timeout'] = 10;
     $options['headers']['Content-Type'] = 'application/json';
 
     try {
-      $response = $this->httpClient->request($method, $url, $options); //referencia request GuzzleHttp
+      $response = $this->httpClient->request($method, $url, $options);
       return json_decode($response->getBody()->getContents(), TRUE);
     }
     catch (RequestException $e) {
-      $this->logger->error('Error call $method to $url: ' . $e->getMessage());
+      $this->logger->error("Error call $method to $url: " . $e->getMessage());
       return NULL;
     }
   }

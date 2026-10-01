@@ -1,10 +1,11 @@
 <?php
 
-namespace Drupal\weather_sync\client\Form;
+namespace Drupal\weather_sync\Form;
 
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\weather_sync\client\Service\WeatherSyncManager;
+use Drupal\weather_sync\Service\WeatherSyncManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**

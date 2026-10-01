@@ -1,11 +1,12 @@
 <?php
 
-namespace Drupal\weather_sync\client\Service;
+namespace Drupal\weather_sync\Service;
 
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
-use Drupal\weather_sync\client\WeatherApiClient;
+use Drupal\weather_sync\Client\WeatherApiClient;
+use Drupal\weather_sync\Event\WeatherUpdatedEvent;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -38,7 +39,7 @@ class WeatherSyncManager {
    */
   public function pullWeather(string $cityName) {
     // 1. verificar cache
-    $cid = 'weather_data' . md5($cityName);
+    $cid = 'weather_data:' . md5($cityName);
     if ($cache = $this->cacheBackend->get($cid)) {
       return $this->entityTypeManager->getStorage('node')->load($cache->data);
     }
@@ -48,7 +49,7 @@ class WeatherSyncManager {
 
     // 3. FALLBACK. si la API no responde
     if (!$data) {
-      $this->logger->warning('API inaccesible. Activando Fallback para: $cityName');
+      $this->logger->warning("API inaccesible. Activando Fallback para: $cityName");
       $nodes = $this->entityTypeManager->getStorage('node')->loadByProperties([
         'type' => 'weather_news',
         'field_city.entity.name' => $cityName,
@@ -68,10 +69,10 @@ class WeatherSyncManager {
 
     $node = reset($nodes);
 
-    // 5. GUARDAS O ACTUALIZAR NODO
+    // 5. GUARDAR O ACTUALIZAR NODO
     if ($node) {
       $node->set('field_temperature', $data['temp']);
-      $node->set('filed_weather_type', $term_id);
+      $node->set('field_weather_type', $term_id);
       $node->save();
     }
     else {
@@ -80,7 +81,7 @@ class WeatherSyncManager {
         'title' => 'Weather to ' . $data['city_name'],
         // se asume que el nombre de la ciudad coincide con un termino en 'weather_city'
         'field_temperature' => $data['temp'],
-        'filed_weather_type' => $term_id,
+        'field_weather_type' => $term_id,
         'status' => 1,
       ]);
       $node->save();

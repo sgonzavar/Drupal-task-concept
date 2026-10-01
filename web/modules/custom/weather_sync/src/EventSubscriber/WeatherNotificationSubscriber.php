@@ -2,7 +2,7 @@
 
 namespace Drupal\weather_sync\EventSubscriber;
 
-use Drupal\Core\Logger\LoggerChannelInterface;
+use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\weather_sync\Event\WeatherUpdatedEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -11,10 +11,10 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  */
 class WeatherNotificationSubscriber implements EventSubscriberInterface {
 
-protected $logger;
+  protected $logger;
 
-  public function __construct(LoggerChannelInterface $logger_factory) {
-    $this->logger = $logger_factory;
+  public function __construct(LoggerChannelFactoryInterface $logger_factory) {
+    $this->logger = $logger_factory->get('weather_sync_notifications');
   }
 
   /**
