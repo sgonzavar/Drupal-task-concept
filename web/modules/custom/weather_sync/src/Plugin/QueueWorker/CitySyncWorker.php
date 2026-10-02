@@ -7,6 +7,15 @@ use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Queue\QueueWorkerBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
+/**
+ * Procesa ciudades encoladas y crea términos en weather_city.
+ *
+ * @QueueWorker(
+ *   id = "weather_sync_city_queue",
+ *   title = @Translation("Weather Sync City Queue"),
+ *   cron = {"time" = 30}
+ * )
+ */
 class CitySyncWorker extends QueueWorkerBase implements ContainerFactoryPluginInterface {
 
   protected EntityTypeManagerInterface $entityTypeManager;
@@ -29,8 +38,12 @@ class CitySyncWorker extends QueueWorkerBase implements ContainerFactoryPluginIn
    * Se ejecuta una vez por cada ciudad encolada por el hook_cron.
    */
   public function processItem($data) {
-    // asuminos que $data es un array devuelto por la API, ej: ['name' => 'Medellin']
-    $city_name = $data['name'];
+    // $data viene del cron: ['name' => 'Bogota,CO']
+    $city_name = $data['name'] ?? '';
+    if (empty($city_name)) {
+      return;
+    }
+
     $term_storage = $this->entityTypeManager->getStorage('taxonomy_term');
 
     $existing = $term_storage->loadByProperties([

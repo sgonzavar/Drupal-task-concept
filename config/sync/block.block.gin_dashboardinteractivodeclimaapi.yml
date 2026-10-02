@@ -1,0 +1,25 @@
+uuid: 2575eddb-a50d-4563-a8dd-1b32805ee037
+langcode: en
+status: true
+dependencies:
+  module:
+    - system
+    - weather_sync
+  theme:
+    - gin
+id: gin_dashboardinteractivodeclimaapi
+theme: gin
+region: content
+weight: 0
+provider: null
+plugin: weather_interactive_block
+settings:
+  id: weather_interactive_block
+  label: 'Dashboard Interactivo de Clima (API)'
+  label_display: visible
+  provider: weather_sync
+visibility:
+  request_path:
+    id: request_path
+    negate: false
+    pages: /node/501

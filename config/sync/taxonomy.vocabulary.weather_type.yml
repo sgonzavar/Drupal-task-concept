@@ -1,0 +1,9 @@
+uuid: 80fc207b-2d1b-4022-a655-a0367c3ad4d0
+langcode: en
+status: true
+dependencies: {  }
+name: 'weather type'
+vid: weather_type
+description: null
+weight: 0
+new_revision: false

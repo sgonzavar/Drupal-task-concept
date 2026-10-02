@@ -22,35 +22,44 @@ function weather_sync_cron() {
   // Timestamp de la última sincronización. Por defecto 0 si nunca ha corrido.
   $last_run = $state->get('weather_sync.last_city_sync', 0);
 
-  // Intervalo de 5 horas: 5 * 60 minutos * 60 segundos = 18000 segundos.
-  $interval = 18000;
+  //intervalo: 5 horas
+  //En dev puede bajarlo a otro valor, 60 para probar: $interval = 60;
+  $interval = (int) \Drupal::config('weather_sync.settings')->get('cron_interval') ?? 180000;
 
   // Evita la ejecución innecesaria si no ha transcurrido la ventana de tiempo.
   if (($time - $last_run) >= $interval) {
     try {
-      // Instancia del servicio cliente HTTP propio del módulo.
-      $api_client = \Drupal::service('weather_sync.api_client');
 
-      // Obtiene el listado completo de ciudades desde el endpoint remoto.
-      $cities = $api_client->get('/cities');
+      //Ciudades objetivo: configurable via config + fallback hardcoded
+      $config_cities = \Drupal::config('weather_sync.settings')->get('target_cities');
+      $target_cities = $config_cities ?: [
+        ['name' => 'Bogota,CO'],
+        ['name' => 'Medellin,CO'],
+        ['name' => 'Cali,CO'],
+        ['name' => 'Barranquilla,CO'],
+        ['name' => 'Cartagena,CO'],
+        ['name' => 'Bucaramanga,CO'],
+        ['name' => 'Pereira,CO'],
+      ];
 
-      if ($cities) {
-        // Obtenemos la cola de procesamiento en segundo plano.
-        $queue = \Drupal::queue('weather_sync_city_queue');
+      // Obtenemos la cola de procesamiento en segundo plano.
+      $queue = \Drupal::queue('weather_sync_city_queue');
+      $endqueue = 0;
 
-        // Encola cada ciudad individualmente para ser procesada por un QueueWorker.
-        foreach ($cities as $city_data) {
+      foreach ($target_cities as $city_data) {
+        //validacion basica
+        if(!empty($city_data['name'])) {
           $queue->createItem($city_data);
+          $endqueue++;
         }
-
-        // Se actualiza el timestamp únicamente cuando la carga a la cola fue exitosa.
-        $state->set('weather_sync.last_city_sync', $time);
-
-        \Drupal::logger('weather_sync')->info(
-          'Weather sync: Se agregaron @count ciudades a la cola para su procesamiento.',
-          ['@count' => count($cities)]
-        );
       }
+
+      $state->set('weather_sync.last_city_sync', $time);
+
+      \Drupal::logger('weather_sync')->notice(
+        'Cron ejecutado: @count ciudades encoladas para taxonomía weather_city.',
+        ['@count' => $endqueue]
+      );
     }
     catch (\Exception $e) {
       // Captura excepciones de red o servicio para evitar que el cron general falle.

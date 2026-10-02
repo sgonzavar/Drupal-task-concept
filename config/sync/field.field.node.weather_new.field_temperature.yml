@@ -1,0 +1,23 @@
+uuid: 519fb826-e24c-452f-9f95-203654c16190
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_temperature
+    - node.type.weather_new
+id: node.weather_new.field_temperature
+field_name: field_temperature
+entity_type: node
+bundle: weather_new
+label: temperature
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  min: null
+  max: null
+  prefix: ''
+  suffix: ''
+field_type: decimal

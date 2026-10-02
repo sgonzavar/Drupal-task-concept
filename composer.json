@@ -29,7 +29,8 @@
         "drupal/paragraphs": "^1.23",
         "drupal/pathauto": "^1.15",
         "drupal/webform": "^6.2",
-        "drush/drush": "^12.4.3"
+        "drush/drush": "^12.4.3",
+        "vlucas/phpdotenv": "^5.7"
     },
     "conflict": {
         "drupal/drupal": "*"

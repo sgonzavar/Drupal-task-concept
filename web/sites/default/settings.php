@@ -810,6 +810,11 @@ $settings['migrate_node_migrate_type_classic'] = FALSE;
  * Keep this code block at the end of this file to take full effect.
  */
 #
+if (file_exists(__DIR__ . '/../../../.env')) {
+  $dotenv = \Dotenv\Dotenv::createImmutable(__DIR__ . '/../../../');
+  $dotenv->load();
+}
+
 if (file_exists($app_root . '/' . $site_path . '/settings.local.php')) {
   include $app_root . '/' . $site_path . '/settings.local.php';
 }
@@ -826,3 +831,6 @@ $databases['default']['default'] = array (
   'autoload' => 'core/modules/mysql/src/Driver/Database/mysql/',
 );
 $settings['config_sync_directory'] = '../config/sync';
+
+$config['weather_sync.settings']['api_base_url'] = $_ENV['WEATHER_API_BASE_URL'] ?? 'https://api.default.com/v1';
+$config['weather_sync.settings']['api_key'] = $_ENV['WEATHER_API_KEY'] ?? '';

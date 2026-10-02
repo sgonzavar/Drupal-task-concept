@@ -1,0 +1,9 @@
+uuid: f4d2173c-3b6a-415d-84de-9dae7de414a6
+langcode: en
+status: true
+dependencies: {  }
+name: 'weather city'
+vid: weather_city
+description: null
+weight: 0
+new_revision: false
